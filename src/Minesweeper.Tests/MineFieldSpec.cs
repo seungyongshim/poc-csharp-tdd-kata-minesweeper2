@@ -30,6 +30,6 @@ public record MineFieldSpec
         var sut = new MineField.SetupWithBombs1(3, 3, new[] { (0, 0) });
         var ret = sut.StartTo();
 
-        Assert.Equal("*", ret.ToStr());
+        Assert.Equal("*11100000", ret.ToInnerStr());
     }
 }
