@@ -9,12 +9,14 @@ public record Cell
 
     public Cell ClickTo() => this switch
     {
+        Empty x => x,
         Covered x => x.Inner.ClickTo(),
         var x => x
     };
 
     public Cell BombTo() => this switch
     {
+        Empty x => x,
         Covered x => x with
         {
             Inner = new Bomb()
@@ -36,4 +38,6 @@ public record Cell
         Number x => Convert.ToChar(48 + x.Value),
         _ => throw new NotImplementedException(),
     };
+
+    public static Cell New() => new Covered(new Number(0));
 }
