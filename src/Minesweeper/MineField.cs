@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using LanguageExt;
+using LanguageExt.Common;
 using static LanguageExt.Prelude;
 using CellMap = LanguageExt.HashMap<(int, int), Minesweeper.Cell>;
 
@@ -13,8 +14,8 @@ public record MineField
     public record SetupWithBombs(int Width, int Height, int Bombs) : MineField;
     public record SetupWithBombsPos(int Width, int Height, IEnumerable<(int X, int Y)> Bombs) : MineField;
     public record Playing(int Width, int Height, CellMap Cells) : MineField;
-    public record Win;
-    public record Loose;
+    public record Win : MineField;
+    public record Loose : MineField;
 
     public string ToInnerStr() => this switch
     {
@@ -46,10 +47,33 @@ public record MineField
     {
         Setup x => x.StartTo().ClickTo(xPos, yPos),
 
-        Playing x => x with
-        {
-            Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.ClickTo(), new Cell.Empty())
-        }
+        SetupWithBombsPos x => x.StartTo().ClickTo(xPos, yPos),
+
+        SetupWithBombs x => x.StartTo().ClickTo(xPos, yPos),
+
+        Playing x => (
+            from _1 in Id(x with
+            {
+                Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.ClickTo(), new Cell.Empty())
+            })
+            let _2 = _1.Cells[(xPos, yPos)] switch
+            { 
+                Cell.Bomb => new Loose() as MineField,
+                Cell.Number { Value : 0 } => _1 with
+                {
+                    Cells = _1.Cells.AddOrUpdate((xPos - 1, yPos - 1), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos, yPos - 1), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos + 1, yPos  - 1), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos - 1, yPos), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos + 1, yPos), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos - 1, yPos + 1), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos, yPos + 1), x => x.ClickTo(), new Cell.Empty())
+                                     .AddOrUpdate((xPos + 1, yPos + 1), x => x.ClickTo(), new Cell.Empty())
+                },
+                _ => _1
+            }
+            select _2).Value
+
     };
 
     public MineField StartTo() => this switch
