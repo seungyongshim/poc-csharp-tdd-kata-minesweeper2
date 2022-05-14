@@ -26,9 +26,19 @@ public record MineFieldSpec
     [Fact]
     public void GenerateWorldWithBombPos()
     {
-        var sut = new MineField.SetupWithBombs1(3, 3, new[] { (0, 0), (0, 2) });
+        var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (0, 0), (0, 2) });
         var ret = sut.StartTo();
 
         Assert.Equal("*2*121000", ret.ToInnerStr());
     }
+
+    [Fact]
+    public void GenerateWorldAndClickToLoose()
+    {
+        var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (0, 0) });
+        var ret = sut.ClickTo(0, 0);
+
+        Assert.IsType<MineField.Loose>(ret);
+    }
+
 }

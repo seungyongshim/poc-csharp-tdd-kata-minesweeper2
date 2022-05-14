@@ -11,7 +11,7 @@ public record MineField
 
     public record Setup(int Width, int Height) : MineField;
     public record SetupWithBombs(int Width, int Height, int Bombs) : MineField;
-    public record SetupWithBombs1(int Width, int Height, IEnumerable<(int X, int Y)> Bombs) : MineField;
+    public record SetupWithBombsPos(int Width, int Height, IEnumerable<(int X, int Y)> Bombs) : MineField;
     public record Playing(int Width, int Height, CellMap Cells) : MineField;
     public record Win;
     public record Loose;
@@ -54,7 +54,7 @@ public record MineField
 
     public MineField StartTo() => this switch
     {
-        SetupWithBombs1 x => new Playing(x.Width, x.Height, fun(() =>
+        SetupWithBombsPos x => new Playing(x.Width, x.Height, fun(() =>
         {
             var q = new CellMap(from b in Enumerable.Range(0, x.Height)
                                 from a in Enumerable.Range(0, x.Width)
@@ -79,7 +79,7 @@ public record MineField
                            from i in RandomGenerator(x.Width)
                            select (i, j)).Distinct().Take(x.Bombs);
 
-            return new SetupWithBombs1(x.Width, x.Height, bombPos);
+            return new SetupWithBombsPos(x.Width, x.Height, bombPos);
 
             static IEnumerable<int> RandomGenerator(int max)
             {
