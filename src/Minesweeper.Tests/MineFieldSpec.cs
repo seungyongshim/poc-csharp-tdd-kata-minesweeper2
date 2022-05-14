@@ -23,4 +23,13 @@ public record MineFieldSpec
 
         Assert.Equal(3, ret.ToCells()?.Where(x => x.Value.IsBomb()).Count());
     }
+
+    [Fact]
+    public void GenerateWorldWithBombPos()
+    {
+        var sut = new MineField.SetupWithBombs1(3, 3, new[] { (0, 0) });
+        var ret = sut.StartTo();
+
+        Assert.Equal("*", ret.ToStr());
+    }
 }
