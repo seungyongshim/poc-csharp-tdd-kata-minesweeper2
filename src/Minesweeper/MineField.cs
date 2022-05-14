@@ -21,6 +21,7 @@ public record MineField
         Playing x => (from b in Enumerable.Range(0, x.Height)
                       from a in Enumerable.Range(0, x.Width)
                       select (a, b))
+                     .OrderBy(x => x)
                      .Fold(new StringBuilder(), (s, e) => s.Append(x.Cells[e].ToInnerChar()))
                      .ToString()
     };
@@ -55,19 +56,27 @@ public record MineField
     {
         SetupWithBombs1 x => new Playing(x.Width, x.Height, fun(() =>
         {
-            var q = new CellMap(from a in Enumerable.Range(0, x.Width)
-                                from b in Enumerable.Range(0, x.Height)
+            var q = new CellMap(from b in Enumerable.Range(0, x.Height)
+                                from a in Enumerable.Range(0, x.Width)
                                 select ((a, b), Cell.New()));
 
-            return x.Bombs.Fold(q, (s, e) => s.AddOrUpdate(e, x => x.BombTo(), new Cell.Empty()));
+            return x.Bombs.Fold(q, (s, e) => s.AddOrUpdate(e, x => x.BombTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X - 1, e.Y - 1), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X , e.Y - 1), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X + 1, e.Y - 1), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X - 1, e.Y), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X + 1, e.Y), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X - 1, e.Y + 1), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X , e.Y + 1), x => x.AddNumberTo(), new Cell.Empty())
+                                              .AddOrUpdate((e.X + 1, e.Y + 1), x => x.AddNumberTo(), new Cell.Empty()));
         })()),
 
         Setup x => new SetupWithBombs(x.Width, x.Height, 0).StartTo(),
 
         SetupWithBombs x => fun(() =>
         {
-            var bombPos = (from i in RandomGenerator(x.Width)
-                           from j in RandomGenerator(x.Height)
+            var bombPos = (from j in RandomGenerator(x.Height)
+                           from i in RandomGenerator(x.Width)
                            select (i, j)).Distinct().Take(x.Bombs);
 
             return new SetupWithBombs1(x.Width, x.Height, bombPos);

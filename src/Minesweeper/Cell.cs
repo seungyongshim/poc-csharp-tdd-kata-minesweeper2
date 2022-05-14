@@ -46,4 +46,11 @@ public record Cell
         Covered x => x.Inner.ToChar(),
         var x => x.ToChar()
     };
+
+    public Cell AddNumberTo() => this switch
+    {
+        Covered x => new Covered(x.Inner.AddNumberTo()),
+        Number x => new Number(x.Value + 1),
+        var x => x
+    };
 }
