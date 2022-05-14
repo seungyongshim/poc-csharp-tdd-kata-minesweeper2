@@ -1,16 +1,32 @@
 namespace Minesweeper;
 
-public interface ICell
+public record Cell
 {
-    public record Covered(ICell Inner) : ICell;
-    public record Bomb : ICell;
-    public record Number(int Value) : ICell;
-    public record Empty : ICell;
+    public record Covered(Cell Inner) : Cell;
+    public record Bomb : Cell;
+    public record Number(int Value) : Cell;
+    public record Empty : Cell;
 
-    public ICell Click() => this switch
+    public Cell ClickTo() => this switch
     {
         Covered x => x.Inner,
         var x => x
+    };
+
+    public Cell ToHasBomb() => this switch
+    {
+        Covered x => x with
+        {
+            Inner = new Bomb()
+        },
+        _ => new Bomb()
+    };
+
+    public bool IsBomb() => this switch
+    {
+        Bomb => true,
+        Covered x => x.Inner.IsBomb(),
+        _ => false
     };
 
     public char ToChar() => this switch

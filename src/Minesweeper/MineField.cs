@@ -1,41 +1,58 @@
 using LanguageExt;
-using static Minesweeper.IMineField;
-using CellMap = LanguageExt.HashMap<(int, int), Minesweeper.ICell>;
+using static Minesweeper.MineField;
+using CellMap = LanguageExt.HashMap<(int, int), Minesweeper.Cell>;
 using static LanguageExt.Prelude;
+using System.Security.Cryptography;
 
 namespace Minesweeper;
 
-public interface IMineField
+public record MineField
 {
-    public record Setup(int Width, int Height) : IMineField;
-    public record SetupWithBombs(int Width, int Height, int Bombs) : IMineField;
-    public record Playing(int Width, int Height, CellMap Cells) : IMineField;
-}
+    public record Setup(int Width, int Height) : MineField;
+    public record SetupWithBombs(int Width, int Height, int Bombs) : MineField;
+    public record Playing(int Width, int Height, CellMap Cells) : MineField;
 
-public static class MineFieldExtension
-{
-    public static Option<CellMap> ToCells(this IMineField @this) => @this switch
+    public CellMap? ToCells() => this switch
     {
         Playing x => x.Cells,
-        _ => None
+        _ => null
     };
 
-    public static IMineField ClickTo(this IMineField @this, int xPos, int yPos) => @this switch
+    public MineField ClickTo(int xPos, int yPos) => this switch
     {
-        Setup x => ClickTo(StartTo(x), xPos, yPos),
+        Setup x => x.StartTo().ClickTo(xPos, yPos),
         Playing x => x with
         {
-            Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.Click(), new ICell.Empty())
+            Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.ClickTo(), new Cell.Empty())
         }
     };
 
-    public static IMineField StartTo<T>(this T @this) where T:IMineField => @this switch
+    public MineField StartTo() => this switch
     {
-        Setup x => new Playing(x.Width, x.Height,
-                               new CellMap(from a in Enumerable.Range(0, x.Width)
-                                           from b in Enumerable.Range(0, x.Height)
-                                           select ((a, b), new ICell.Covered(new ICell.Number(0)) as ICell))),
-        SetupWithBombs x => from _1 in Id(new Setup(x.Width, x.Width).StartTo() as Playing)
-                            select _1
+        Setup x => new SetupWithBombs(x.Width, x.Height, 0).StartTo(),
+
+        SetupWithBombs x => new Playing(x.Width, x.Height, fun(() =>
+        {
+            var bombPos = (from i in RandomGenerator(x.Width)
+                           from j in RandomGenerator(x.Height)
+                           select (i, j)).Distinct().Take(x.Bombs);
+
+            var q = new CellMap(from a in Enumerable.Range(0, x.Width)
+                                from b in Enumerable.Range(0, x.Height)
+                                select ((a, b), new Cell.Covered(new Cell.Number(0)) as Cell));
+
+            return bombPos.Fold(q, (s, e) => s.AddOrUpdate(e, x => x.ToHasBomb(), () => null));
+
+            static IEnumerable<int> RandomGenerator(int max)
+            {
+                while (true)
+                {
+                    yield return RandomNumberGenerator.GetInt32(max);
+                }
+            }
+        })())
     };
+
+    
 }
+
