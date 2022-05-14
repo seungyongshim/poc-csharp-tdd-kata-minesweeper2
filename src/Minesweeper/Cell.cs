@@ -40,4 +40,10 @@ public record Cell
     };
 
     public static Cell New() => new Covered(new Number(0));
+
+    public char ToInnerChar() => this switch
+    {
+        Covered x => x.Inner.ToChar(),
+        var x => x.ToChar()
+    };
 }

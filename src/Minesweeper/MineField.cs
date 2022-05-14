@@ -16,6 +16,15 @@ public record MineField
     public record Win;
     public record Loose;
 
+    public string ToInnerStr() => this switch
+    {
+        Playing x => (from b in Enumerable.Range(0, x.Height)
+                      from a in Enumerable.Range(0, x.Width)
+                      select (a, b))
+                     .Fold(new StringBuilder(), (s, e) => s.Append(x.Cells[e].ToInnerChar()))
+                     .ToString()
+    };
+
     public string ToStr() => this switch
     {
         Playing x => (from b in Enumerable.Range(0, x.Height)
