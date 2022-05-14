@@ -20,6 +20,6 @@ public class UnitTest1
         var sut = new Number(1);
         var ret = sut.ToChar();
 
-        Assert.Equal('0', ret);
+        Assert.Equal('1', ret);
     }
 }
