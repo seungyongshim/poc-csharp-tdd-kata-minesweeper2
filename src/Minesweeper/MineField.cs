@@ -41,7 +41,7 @@ public record MineField
                                 from b in Enumerable.Range(0, x.Height)
                                 select ((a, b), new Cell.Covered(new Cell.Number(0)) as Cell));
 
-            return bombPos.Fold(q, (s, e) => s.AddOrUpdate(e, x => x.ToHasBomb(), () => null));
+            return bombPos.Fold(q, (s, e) => s.AddOrUpdate(e, x => x.BombTo(), () => null));
 
             static IEnumerable<int> RandomGenerator(int max)
             {

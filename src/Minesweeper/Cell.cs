@@ -9,11 +9,11 @@ public record Cell
 
     public Cell ClickTo() => this switch
     {
-        Covered x => x.Inner,
+        Covered x => x.Inner.ClickTo(),
         var x => x
     };
 
-    public Cell ToHasBomb() => this switch
+    public Cell BombTo() => this switch
     {
         Covered x => x with
         {
