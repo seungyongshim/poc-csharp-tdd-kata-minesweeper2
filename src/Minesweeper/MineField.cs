@@ -51,29 +51,25 @@ public record MineField
 
         SetupWithBombs x => x.StartTo().ClickTo(xPos, yPos),
 
-        Playing x => (
+        Playing x => x.Cells.ContainsKey((xPos, yPos)) ? x.Cells[(xPos, yPos)] is Cell.Covered ? (
             from _1 in Id(x with
             {
                 Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.ClickTo(), new Cell.Empty())
             })
             let _2 = _1.Cells[(xPos, yPos)] switch
-            { 
-                Cell.Bomb => new Loose() as MineField,
-                Cell.Number { Value : 0 } => _1 with
-                {
-                    Cells = _1.Cells.AddOrUpdate((xPos - 1, yPos - 1), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos, yPos - 1), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos + 1, yPos  - 1), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos - 1, yPos), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos + 1, yPos), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos - 1, yPos + 1), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos, yPos + 1), x => x.ClickTo(), new Cell.Empty())
-                                     .AddOrUpdate((xPos + 1, yPos + 1), x => x.ClickTo(), new Cell.Empty())
-                },
+            {
+                Cell.Bomb => new Loose(),
+                Cell.Number { Value: 0 } => _1.ClickTo(xPos - 1, yPos - 1)
+                                              .ClickTo(xPos, yPos - 1)
+                                              .ClickTo(xPos + 1, yPos - 1)
+                                              .ClickTo(xPos - 1, yPos)
+                                              .ClickTo(xPos + 1, yPos)
+                                              .ClickTo(xPos - 1, yPos + 1)
+                                              .ClickTo(xPos, yPos + 1)
+                                              .ClickTo(xPos + 1, yPos + 1),
                 _ => _1
-            }
-            select _2).Value
-
+            } 
+            select _2).Value : x : x
     };
 
     public MineField StartTo() => this switch

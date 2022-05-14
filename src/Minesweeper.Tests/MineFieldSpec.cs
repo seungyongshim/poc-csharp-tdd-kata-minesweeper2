@@ -41,4 +41,13 @@ public record MineFieldSpec
         Assert.IsType<MineField.Loose>(ret);
     }
 
+    [Fact]
+    public void GenerateWorldAndClickToLoose2()
+    {
+        var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (2, 2) });
+        var ret = sut.ClickTo(0, 0);
+
+        Assert.Equal("00001101.", ret.ToStr());
+    }
+
 }
