@@ -42,9 +42,18 @@ public record MineFieldSpec
     }
 
     [Fact]
-    public void GenerateWorldAndClickToLoose2()
+    public void GenerateWorldAndClickToWin()
     {
         var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (2, 2) });
+        var ret = sut.ClickTo(0, 0);
+
+        Assert.IsType<MineField.Win>(ret);
+    }
+
+    [Fact]
+    public void GenerateWorldAndClick()
+    {
+        var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (1, 2), (2, 1) });
         var ret = sut.ClickTo(0, 0);
 
         Assert.Equal("00001101.", ret.ToStr());

@@ -51,7 +51,7 @@ public record MineField
 
         SetupWithBombs x => x.StartTo().ClickTo(xPos, yPos),
 
-        Playing x => x.Cells.ContainsKey((xPos, yPos)) ? x.Cells[(xPos, yPos)] is Cell.Covered ? (
+        Playing x => x.Cells.ContainsKey((xPos, yPos)) ? x.Cells[(xPos, yPos)] is Cell.Covered ? Id(
             from _1 in Id(x with
             {
                 Cells = x.Cells.AddOrUpdate((xPos, yPos), y => y.ClickTo(), new Cell.Empty())
@@ -69,12 +69,17 @@ public record MineField
                                               .ClickTo(xPos + 1, yPos + 1),
                 _ => _1
             } 
-            select _2).Value : x : x
+            select _2).Value.Map(a => a.ToCells()?
+                                       .Filter((k, v) => v is Cell.Covered)
+                                       .Exists((k, v) => v.IsBomb() is not true) ?? true ? a : new Win()).Value
+            : x : x,
+
+        var x => x
     };
 
     public MineField StartTo() => this switch
     {
-        SetupWithBombsPos x => new Playing(x.Width, x.Height, fun(() =>
+        SetupWithBombsPos x => new Playing(x.Width, x.Height, Id(() =>
         {
             var q = new CellMap(from b in Enumerable.Range(0, x.Height)
                                 from a in Enumerable.Range(0, x.Width)
@@ -89,11 +94,11 @@ public record MineField
                                               .AddOrUpdate((e.X - 1, e.Y + 1), x => x.AddNumberTo(), new Cell.Empty())
                                               .AddOrUpdate((e.X , e.Y + 1), x => x.AddNumberTo(), new Cell.Empty())
                                               .AddOrUpdate((e.X + 1, e.Y + 1), x => x.AddNumberTo(), new Cell.Empty()));
-        })()),
+        }).Value()),
 
         Setup x => new SetupWithBombs(x.Width, x.Height, 0).StartTo(),
 
-        SetupWithBombs x => fun(() =>
+        SetupWithBombs x => Id(() =>
         {
             var bombPos = (from j in RandomGenerator(x.Height)
                            from i in RandomGenerator(x.Width)
@@ -108,7 +113,7 @@ public record MineField
                     yield return RandomNumberGenerator.GetInt32(max);
                 }
             }
-        })().StartTo(),
+        }).Value().StartTo(),
 
         var x => x
     };
