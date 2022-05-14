@@ -10,12 +10,18 @@ public record MineFieldSpec
     public void GenerateWorld()
     {
         IMineField sut = new IMineField.Setup(3, 3);
-        var ret = sut.ClickTo(0, 0);
+        var ret = sut.StartTo();
 
         Assert.Equal(ret.ToCells().Case switch
         {
-            null => throw new Exception(),
             CellMap x => x.Length
         }, 9);
+    }
+
+    [Fact]
+    public void GenerateWorldWithBombs()
+    {
+        IMineField sut = new IMineField.SetupWithBombs(3, 3, 3);
+        var ret = sut.StartTo();
     }
 }

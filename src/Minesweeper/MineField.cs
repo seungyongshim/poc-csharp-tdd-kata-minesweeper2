@@ -8,6 +8,7 @@ namespace Minesweeper;
 public interface IMineField
 {
     public record Setup(int Width, int Height) : IMineField;
+    public record SetupWithBombs(int Width, int Height, int Bombs) : IMineField;
     public record Playing(int Width, int Height, CellMap Cells) : IMineField;
 }
 
@@ -28,10 +29,13 @@ public static class MineFieldExtension
         }
     };
 
-    public static IMineField StartTo(this IMineField @this) => @this switch
+    public static IMineField StartTo<T>(this T @this) where T:IMineField => @this switch
     {
-        Setup l => new Playing(l.Width, l.Height, new CellMap(from a in Enumerable.Range(0, l.Width)
-                                                              from b in Enumerable.Range(0, l.Height)
-                                                              select ((a, b), new ICell.Covered(new ICell.Number(0)) as ICell)))
+        Setup x => new Playing(x.Width, x.Height,
+                               new CellMap(from a in Enumerable.Range(0, x.Width)
+                                           from b in Enumerable.Range(0, x.Height)
+                                           select ((a, b), new ICell.Covered(new ICell.Number(0)) as ICell))),
+        SetupWithBombs x => from _1 in Id(new Setup(x.Width, x.Width).StartTo() as Playing)
+                            select _1
     };
 }
