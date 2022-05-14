@@ -3,7 +3,7 @@ using static Minesweeper.ICell;
 
 namespace Minesweeper.Tests;
 
-public class UnitTest1
+public record CellSpec
 {
     [Fact]
     public void BombSpec()
@@ -30,5 +30,14 @@ public class UnitTest1
         var ret = sut.ToChar();
 
         Assert.Equal('.', ret);
+    }
+
+    [Fact]
+    public void ClickSpec()
+    {
+        ICell sut = new Covered(new Number(1));
+        var ret = sut.Click().ToChar();
+
+        Assert.Equal('1', ret);
     }
 }
