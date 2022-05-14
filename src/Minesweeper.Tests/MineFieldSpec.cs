@@ -56,7 +56,7 @@ public record MineFieldSpec
         var sut = new MineField.SetupWithBombsPos(3, 3, new[] { (1, 2), (2, 1) });
         var ret = sut.ClickTo(0, 0);
 
-        Assert.Equal("00001101.", ret.ToStr());
+        Assert.Equal("01.12....", ret.ToStr());
     }
 
 }
