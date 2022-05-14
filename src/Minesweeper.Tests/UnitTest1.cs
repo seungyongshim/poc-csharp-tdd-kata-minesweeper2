@@ -1,5 +1,5 @@
 using Xunit;
-using static Minesweeper.Cell;
+using static Minesweeper.ICell;
 
 namespace Minesweeper.Tests;
 
@@ -8,7 +8,7 @@ public class UnitTest1
     [Fact]
     public void BombSpec()
     {
-        var sut = new Bomb();
+        ICell sut = new Bomb();
         var ret = sut.ToChar();
 
         Assert.Equal('*', ret);
@@ -17,9 +17,18 @@ public class UnitTest1
     [Fact]
     public void NumberSpec()
     {
-        var sut = new Number(1);
+        ICell sut = new Number(1);
         var ret = sut.ToChar();
 
         Assert.Equal('1', ret);
+    }
+
+    [Fact]
+    public void CoveredSpec()
+    {
+        ICell sut = new Covered(new Number(0));
+        var ret = sut.ToChar();
+
+        Assert.Equal('.', ret);
     }
 }
